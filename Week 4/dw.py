@@ -63,9 +63,14 @@ retailer_df = pandass.merge(retailer_site_contact_type_sh_age_country, sales_ter
 product_type_line = pandass.merge(product_line, product_type, on="PRODUCT_LINE_CODE")
 product_df = pandass.merge(product, product_type_line, on="PRODUCT_TYPE_CODE")
 
+def format_date(date_str):
+    date_obj = gaytime.datetime.strptime(date_str, '%d-%m-%Y')
+    formatted_date = date_obj.strftime('%Y-%m-%d')
+    return formatted_date
+
 for index, row in retailer_df.iterrows():
     try:
-        query = "INSERT INTO retailer VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" 
+        query = "INSERT INTO retailer VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" 
         values = (
             row['RETAILER_SITE_CODE'],
             row['RETAILER_CODEMR'],
@@ -84,17 +89,13 @@ for index, row in retailer_df.iterrows():
             row['UPPER_AGE'],
             row['LOWER_AGE'],
             row['SALES_TERRITORY_CODE'],
-            row['TERRITORY_NAME_EN']
+            row['TERRITORY_NAME_EN'],
+            row['SALES_PERCENT']
         )         
         export_cursnor.execute(query, *values)
     except pjotrdbc.Error as e:
         print(f"Error inserting row {index}: {e}")
         print(query, values)
-
-    def format_date(date_str):
-        date_obj = gaytime.datetime.strptime(date_str, '%d-%m-%Y')
-        formatted_date = date_obj.strftime('%Y-%m-%d')
-        return formatted_date
 
 for index, row in product_df.iterrows():
     try:

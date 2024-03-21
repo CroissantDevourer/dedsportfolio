@@ -58,13 +58,9 @@ retailer_df = pandass.merge(retailer_site_contact_type_sh_age_country, sales_ter
 
 for index, row in retailer_df.iterrows():
     try:
-        query = "INSERT INTO retailer VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" 
+        query = "INSERT INTO retailer VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" 
         values = (
             row['RETAILER_SITE_CODE'],
-            row['RETAILER_CONTACT_CODE'],
-            row['FIRST_NAME'],
-            row['LAST_NAME'],
-            row['EXTENSION'],
             row['RETAILER_CODEMR'],
             row['COMPANY_NAME'],
             row['POSTAL_ZONE_x'],
@@ -73,10 +69,13 @@ for index, row in retailer_df.iterrows():
             row['RETAILER_TYPE_EN'],
             row['RETAILER_TYPE_CODE'],
             row['COUNTRY_CODE_x'],
+            row['COUNTRY_EN'],
             row['SEGMENT_CODE'],
+            row['SEGMENT_NAME'],
             row['GENDER'],
             row['AGE_GROUP_CODE'],
-            row['COUNTRY_EN'],
+            row['UPPER_AGE'],
+            row['LOWER_AGE'],
             row['SALES_TERRITORY_CODE'],
             row['TERRITORY_NAME_EN']
         )         

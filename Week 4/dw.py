@@ -30,6 +30,8 @@ product = pandass.read_sql("SELECT * FROM product", sales_conn)
 sales_staff = pandass.read_sql("SELECT * FROM sales_staff", staff_conn)
 return_reason = pandass.read_sql("SELECT * FROM return_reason", sales_conn)
 course = pandass.read_sql("SELECT * FROM course", staff_conn)
+product_type = pandass.read_sql("SELECT * FROM product_type", sales_conn)
+product_line = pandass.read_sql("SELECT * FROM product_line", sales_conn)
 
 # retailer inlezen
 
@@ -55,6 +57,11 @@ age_sales_demo = pandass.merge(age_group, sales_demographic, on="AGE_GROUP_CODE"
 retailer_site_contact_type_sh_age = pandass.merge(retailer_site_contact_type_sh, age_sales_demo, on="RETAILER_CODEMR")
 retailer_site_contact_type_sh_age_country = pandass.merge(retailer_site_contact_type_sh_age, country, left_on="COUNTRY_CODE_x", right_on="COUNTRY_CODE")
 retailer_df = pandass.merge(retailer_site_contact_type_sh_age_country, sales_territory, on="SALES_TERRITORY_CODE")
+
+#product merging
+
+product_type_line = pandass.merge(product_line, product_type, on="PRODUCT_LINE_CODE")
+product_df = pandass.merge(product, product_type_line, on="PRODUCT_TYPE_CODE")
 
 for index, row in retailer_df.iterrows():
     try:
@@ -84,6 +91,33 @@ for index, row in retailer_df.iterrows():
         print(f"Error inserting row {index}: {e}")
         print(query, values)
 
+    def format_date(date_str):
+        date_obj = gaytime.datetime.strptime(date_str, '%d-%m-%Y')
+        formatted_date = date_obj.strftime('%Y-%m-%d')
+        return formatted_date
+
+for index, row in product_df.iterrows():
+    try:
+        sales_price = float(row['PRODUCTION_COST']) * (1 + float(row['MARGIN']))
+        formatted_date = format_date(row['INTRODUCTION_DATE'])
+        query = "INSERT INTO product VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" 
+        values = (
+            row['PRODUCT_NAME'],
+            row['DESCRIPTION'],
+            sales_price,
+            row['LANGUAGE'],
+            row['PRODUCTION_COST'],
+            row['MARGIN'],
+            formatted_date,
+            row['PRODUCT_TYPE_EN'],
+            row['PRODUCT_LINE_EN'],
+            row['PRODUCT_LINE_CODE']
+        )         
+        export_cursnor.execute(query, *values)
+    except pjotrdbc.Error as e:
+        print(f"Error inserting row {index}: {e}")
+        print(query, values)
+    
 export_conn.commit()
 export_cursnor.close()
 

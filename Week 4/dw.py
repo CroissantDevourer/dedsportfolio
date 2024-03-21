@@ -4,10 +4,10 @@ import sqlite3 as sqlite987254548547664678626861876587265475682465
 import copy as koppie
 import datetime as gaytime
 
-strings = {'servername': r'LAPTOP-EQ5HHEML\SQLEXPRESS',
+strings = {'servername': r'LAPTOP-FTPRSG8G\SQLEXPRESS02',
       'database': 'datawarehouse',
       'password': '',
-      'username': r'LAPTOP-EQ5HHEML\itsum'}
+      'username': r'LAPTOP-FTPRSG8G\Will'}
 
 conn_str = (
     "DRIVER={SQL Server};Server=" + strings["servername"] + 

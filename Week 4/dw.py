@@ -24,7 +24,7 @@ crm_conn = sqlite987254548547664678626861876587265475682465.connect("../week 2/g
 sales_conn = sqlite987254548547664678626861876587265475682465.connect("../week 2/go_sales.sqlite")
 staff_conn = sqlite987254548547664678626861876587265475682465.connect("../week 2/go_staff.sqlite")
 
-# tabel
+# tabellen inlezen
 
 product = pandass.read_sql("SELECT * FROM product", sales_conn)
 sales_staff = pandass.read_sql("SELECT * FROM sales_staff", staff_conn)
@@ -32,8 +32,11 @@ return_reason = pandass.read_sql("SELECT * FROM return_reason", sales_conn)
 course = pandass.read_sql("SELECT * FROM course", staff_conn)
 product_type = pandass.read_sql("SELECT * FROM product_type", sales_conn)
 product_line = pandass.read_sql("SELECT * FROM product_line", sales_conn)
+sales_branch = pandass.read_sql("SELECT * FROM sales_branch", sales_conn)
+return_reason = pandass.read_sql("SELECT * FROM return_reason", sales_conn)
+course = pandass.read_sql("SELECT * FROM course", staff_conn)
 
-# retailer inlezen
+# retailer merge tabellen inlezen
 
 retailer_site = pandass.read_sql("SELECT * FROM retailer_site", crm_conn)
 retailer_contact = pandass.read_sql("SELECT * FROM retailer_contact", crm_conn)
@@ -45,6 +48,7 @@ retailer_headquarters = pandass.read_sql("SELECT * FROM retailer_headquarters", 
 sales_demographic = pandass.read_sql("SELECT * FROM sales_demographic", crm_conn)
 country = pandass.read_sql("SELECT * FROM country", crm_conn)
 sales_territory = pandass.read_sql("SELECT * FROM sales_territory", crm_conn)
+
 
 #retailer merging
 
@@ -62,6 +66,10 @@ retailer_df = pandass.merge(retailer_site_contact_type_sh_age_country, sales_ter
 
 product_type_line = pandass.merge(product_line, product_type, on="PRODUCT_LINE_CODE")
 product_df = pandass.merge(product, product_type_line, on="PRODUCT_TYPE_CODE")
+
+#sales_staff merging
+
+sales_staff_df = pandass.merge(sales_staff, sales_branch, on="SALES_BRANCH_CODE")
 
 def format_date(date_str):
     date_obj = gaytime.datetime.strptime(date_str, '%d-%m-%Y')
@@ -119,6 +127,47 @@ for index, row in product_df.iterrows():
         print(f"Error inserting row {index}: {e}")
         print(query, values)
     
+for index, row in sales_staff_df.iterrows():
+    try:
+        query = "INSERT INTO sales_staff VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)" 
+        values = (
+            row['FIRST_NAME'],
+            row['LAST_NAME'],
+            row['EXTENSION'],
+            row['WORK_PHONE'],
+            row['FAX'],
+            row['EMAIL'],
+            row['DATE_HIRED'],
+            row['ADDRESS1'],
+            row['ADDRESS2']
+        )         
+        export_cursnor.execute(query, *values)
+    except pjotrdbc.Error as e:
+        print(f"Error inserting row {index}: {e}")
+        print(query, values)
+
+for index, row in return_reason.iterrows():
+    try:
+        query = "INSERT INTO return_reason VALUES (?)" 
+        values = (
+            (row['RETURN_DESCRIPTION_EN'],)
+        )         
+        export_cursnor.execute(query, *values)
+    except pjotrdbc.Error as e:
+        print(f"Error inserting row {index}: {e}")
+        print(query, values)
+
+for index, row in course.iterrows():
+    try:
+        query = "INSERT INTO course VALUES (?)" 
+        values = (
+            (row['COURSE_DESCRIPTION'],)
+        )         
+        export_cursnor.execute(query, *values)
+    except pjotrdbc.Error as e:
+        print(f"Error inserting row {index}: {e}")
+        print(query, values)
+
 export_conn.commit()
 export_cursnor.close()
 
